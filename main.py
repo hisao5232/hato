@@ -17,7 +17,7 @@ driver.get(url)
 time.sleep(3)
 
 #チェックボックスを見るため画面スクロール
-driver.execute_script("window.scrollTo(0, 1000)")
+driver.execute_script("window.scrollTo(0, 400)")
 time.sleep(3)
 
 #市町村チェックボックの数取得
@@ -31,41 +31,37 @@ for i in range(len(check_boxes)):
 
 #検索ボタンクリック
 driver.find_element(By.CSS_SELECTOR,"div.sticky-footer>button").click()
-time.sleep(30)
+time.sleep(3)
     
-"""
-    #1ページ目の各社のhref要素取得
-    href_elems=driver.find_elements(By.CSS_SELECTOR,"h3>a.MuiTypography-root")
+#1ページ目の各社のhref要素取得
+a_tags=driver.find_elements(By.CSS_SELECTOR,"div.ms-auto>a")
 
-    #hrefのみリストに格納
-    for href_elm in href_elems:
-        href=href_elm.get_attribute("href")
-        href_list.append(href)
+#hrefのみリストに格納
+for a_tag in a_tags:
+    href=a_tag.get_attribute("href")
+    href_list.append(href)
+    print((len(href_list)))
 
-    #次のページへクリック
-    while True:
-        try:
-            driver.find_element(By.CSS_SELECTOR,"#__next > div.MuiContainer-root.MuiContainer-maxWidthMd.MuiContainer-disableGutters.css-u9s6t2 > main > div > div > div.MuiBox-root.css-0 > div > nav.MuiPagination-root.MuiPagination-text.css-fkxhek > ul > li:nth-child(6) > button").click()
-            print("next_page")
-            time.sleep(3)
+#次のページへクリック
+while True:
+    try:
+        driver.find_element(By.CSS_SELECTOR,'a[aria-label="Next"]').click()
+        print("next_page")
+        time.sleep(3)
 
-            #現在のページの各社のhref要素取得
-            href_elems=driver.find_elements(By.CSS_SELECTOR,"h3>a.MuiTypography-root")
+        #現在のページの各社のhref要素取得
+        a_tags=driver.find_elements(By.CSS_SELECTOR,"div.ms-auto>a")
 
-            #hrefのみリストに追加
-            for href_elm in href_elems:
-                href=href_elm.get_attribute("href")
-                href_list.append(href)
+        #hrefのみリストに追加
+        for a_tag in a_tags:
+            href=a_tag.get_attribute("href")
+            href_list.append(href)
 
-        #次のページがない場合
-        except:
-            print("page_end")
-            print(len(href_list))
-            break
-
-    #トップページに戻る
-    driver.get(url)
-    time.sleep(3)
+    #次のページがない場合
+    except:
+        print("page_end")
+        print(len(href_list))
+        break
 
 #詳細取得
 for shop_href in href_list:
@@ -74,13 +70,17 @@ for shop_href in href_list:
     time.sleep(3)
 
     #詳細取得
-    name=driver.find_element(By.CSS_SELECTOR,"div>h1").text
+    name=driver.find_element(By.CSS_SELECTOR,"div.agent-name").text
     name=name.replace("\u3000"," ")
-    address=driver.find_element(By.XPATH,"//th[contains(text(), '住所')]/following-sibling::td[1]").text
+    address=driver.find_element(By.XPATH,"//p[contains(text(), '住所')]/following-sibling::p").text
     address=address.replace("\u3000"," ")
-    tell=driver.find_element(By.CSS_SELECTOR,"p.css-1iosi0b").text
-    fax=driver.find_element(By.CSS_SELECTOR,"p.css-1aeu9lz").text
-    ceo=driver.find_element(By.XPATH,"//th[contains(text(), '代表者')]/following-sibling::td[1]").text
+    tell=driver.find_element(By.XPATH,"//p[contains(text(), '連絡先')]/following-sibling::p").text
+    tell_t=tell.split()
+    tell=tell_t[0]
+    tell=tell.replace("[TEL]","")
+    fax=tell_t[1]
+    fax=fax.replace("[FAX]","")
+    ceo=driver.find_element(By.XPATH,"//p[contains(text(), '代表者')]/following-sibling::p").text
     ceo=ceo.replace("\u3000"," ")
     dict_detail={"会社名":name,"会社住所":address,"TELL番号":tell,"FAX番号":fax,"代表者名":ceo}
     print(dict_detail)
@@ -90,4 +90,4 @@ driver.quit()
 
 #エクセル出力
 df=pd.DataFrame(detail_list)
-df.to_excel("rabby_ibaragi_deta.xlsx")"""
+df.to_excel("hato_ibaragi_deta.xlsx")
